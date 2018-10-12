@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -30,6 +31,9 @@ func main() {
 	}
 
 	for _, container := range containers {
-		fmt.Printf("%s %s\n", container.ID[:0], container.Image)
+		if !strings.Contains(container.Image, ":") {
+			container.Image = container.Image + ":latest"
+		}
+		fmt.Printf("%s\n", container.Image)
 	}
 }
