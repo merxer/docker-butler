@@ -20,6 +20,7 @@ func Filter(s []string, r string) []string {
 }
 
 func main() {
+	allImages := make([]string,0)
 	unusedImages := make([]string,0)
 
 	cli, err := client.NewClientWithOpts(client.WithVersion("1.37"))
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	for _, image := range images {
-		unusedImages = append(unusedImages,image.RepoTags[0])
+		allImages = append(allImages,image.RepoTags[0])
 	}
 
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
@@ -41,12 +42,13 @@ func main() {
 		panic(err)
 	}
 
+	if len(containers) == 0 { unusedImages = allImages }
+
 	for _, container := range containers {
 		if !strings.Contains(container.Image, ":") {
 			container.Image = container.Image + ":latest"
 		}
-		unusedImages = Filter(unusedImages, container.Image)
-
+		unusedImages = Filter(allImages, container.Image)
 	}
 
 	for _, removeImage := range unusedImages {
